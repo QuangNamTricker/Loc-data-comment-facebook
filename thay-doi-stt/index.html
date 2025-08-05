@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Sequence Modifier</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .input-section {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        textarea {
+            height: 200px;
+            padding: 10px;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        input[type="number"] {
+            padding: 8px;
+            width: 80px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .download-btn {
+            background-color: #2196F3;
+        }
+        .download-btn:hover {
+            background-color: #0b7dda;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Sequence Modifier</h1>
+    <div class="container">
+        <div class="input-section">
+            <h2>Input Data</h2>
+            <textarea id="inputData" placeholder="Paste your data here..."></textarea>
+            <div class="controls">
+                <button id="processBtn">Process Data</button>
+                <label for="startNumber">Start from:</label>
+                <input type="number" id="startNumber" min="1" value="1">
+                <button id="downloadBtn" class="download-btn">Download Modified Data</button>
+            </div>
+        </div>
+        
+        <div id="resultSection" style="display: none;">
+            <h2>Modified Data</h2>
+            <div id="tableContainer" style="max-height: 500px; overflow-y: auto;">
+                <table id="resultTable">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputData = document.getElementById('inputData');
+            const processBtn = document.getElementById('processBtn');
+            const startNumber = document.getElementById('startNumber');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const resultSection = document.getElementById('resultSection');
+            const tableBody = document.getElementById('tableBody');
+            
+            let currentData = [];
+            
+            processBtn.addEventListener('click', function() {
+                const dataText = inputData.value.trim();
+                if (!dataText) {
+                    alert('Please enter some data first');
+                    return;
+                }
+                
+                const lines = dataText.split('\n');
+                currentData = [];
+                
+                for (const line of lines) {
+                    if (line.trim() === '') continue;
+                    
+                    // Split by tabs or multiple spaces
+                    const parts = line.split(/\t|\s{2,}/).filter(part => part.trim() !== '');
+                    
+                    if (parts.length >= 3) {
+                        currentData.push({
+                            number: parts[0],
+                            name: parts[1],
+                            phone: parts[2],
+                            details: parts.slice(3).join(' ')
+                        });
+                    }
+                }
+                
+                updateTable();
+                resultSection.style.display = 'block';
+            });
+            
+            startNumber.addEventListener('change', function() {
+                if (currentData.length > 0) {
+                    updateTable();
+                }
+            });
+            
+            function updateTable() {
+                const startNum = parseInt(startNumber.value) || 1;
+                tableBody.innerHTML = '';
+                
+                for (let i = 0; i < currentData.length; i++) {
+                    const row = document.createElement('tr');
+                    
+                    const newNumber = startNum + i;
+                    const item = currentData[i];
+                    
+                    row.innerHTML = `
+                        <td>${newNumber}</td>
+                        <td>${item.name}</td>
+                        <td>${item.phone}</td>
+                        <td>${item.details}</td>
+                    `;
+                    
+                    tableBody.appendChild(row);
+                }
+            }
+            
+            downloadBtn.addEventListener('click', function() {
+                if (currentData.length === 0) {
+                    alert('No data to download');
+                    return;
+                }
+                
+                const startNum = parseInt(startNumber.value) || 1;
+                let outputText = '';
+                
+                for (let i = 0; i < currentData.length; i++) {
+                    const newNumber = startNum + i;
+                    const item = currentData[i];
+                    outputText += `${newNumber}\t${item.name}\t${item.phone}\t${item.details}\n`;
+                }
+                
+                const blob = new Blob([outputText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'modified_data.txt';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        });
+    </script>
+</body>
+</html>
