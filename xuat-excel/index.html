@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Processing Tool</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f8961e;
+            --danger-color: #f94144;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f5f7fa;
+            color: var(--dark-color);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 30px;
+        }
+
+        header {
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid #ced4da;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 14px;
+            resize: vertical;
+            transition: var(--transition);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.25);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #3aa8d8;
+            transform: translateY(-2px);
+        }
+
+        .btn-warning {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #e07e0c;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #e03134;
+            transform: translateY(-2px);
+        }
+
+        .btn-info {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .btn-info:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 15px 20px;
+            box-shadow: var(--box-shadow);
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .table-container {
+            border: 1px solid #dee2e6;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+            margin-top: 20px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 15px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            font-weight: 500;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+
+        tr:hover {
+            background-color: #e9ecef;
+        }
+
+        .duplicate-sdt {
+            background-color: #fff3cd;
+        }
+
+        .removed-duplicate {
+            text-decoration: line-through;
+            color: #6c757d;
+            background-color: #f8d7da;
+        }
+
+        .copy-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .settings-panel {
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .settings-title {
+            font-weight: 500;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .form-check-input {
+            margin-right: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .stat-card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-table"></i> Công Cụ Xử Lý Dữ Liệu</h1>
+            <p class="subtitle">Nhập dữ liệu, xử lý và xuất file Excel chỉ với một cú nhấp chuột</p>
+        </header>
+        
+        <div class="settings-panel">
+            <div class="settings-title">
+                <i class="fas fa-cog"></i> Cài đặt xử lý dữ liệu
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="autoRemoveDuplicates" class="form-check-input" checked>
+                <label for="autoRemoveDuplicates">Tự động xóa bản ghi trùng SĐT (ưu tiên xóa bản không có nội dung)</label>
+            </div>
+            <div class="form-check">
+                <input type="checkbox" id="keepFirstRecord" class="form-check-input">
+                <label for="keepFirstRecord">Giữ lại bản ghi đầu tiên khi xóa trùng (thay vì bản có nội dung)</label>
+            </div>
+        </div>
+        
+        <div class="input-section">
+            <label for="inputData" class="input-label">
+                <i class="fas fa-paste"></i> Dán dữ liệu vào đây (dữ liệu phân cách bằng tab hoặc nhiều khoảng trắng):
+            </label>
+            <textarea id="inputData" placeholder="Dán dữ liệu vào đây... Ví dụ:
+11    Bống Thảo    +84 378 513 438    mua 2 nhận trang /0378513438    Cho mua 2 nhận trang /0378513438
+25    Huyen Le    +84 394 479 281    ---    Sửa tắm 0394479281"></textarea>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-primary" onclick="processData()">
+                <i class="fas fa-cogs"></i> Xử lý dữ liệu
+            </button>
+            <button class="btn btn-success" onclick="exportToExcel()">
+                <i class="fas fa-file-excel"></i> Xuất Excel
+            </button>
+            <button class="btn btn-info" onclick="removeDuplicates()">
+                <i class="fas fa-filter"></i> Xóa bản trùng
+            </button>
+            <button class="btn btn-warning" onclick="copyAllData()">
+                <i class="fas fa-copy"></i> Sao chép tất cả
+            </button>
+            <button class="btn btn-danger" onclick="clearData()">
+                <i class="fas fa-trash-alt"></i> Xóa dữ liệu
+            </button>
+        </div>
+        
+        <div class="stats" id="statsContainer" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-title">Tổng số bản ghi</div>
+                <div class="stat-value" id="totalRecords">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Số điện thoại duy nhất</div>
+                <div class="stat-value" id="uniquePhones">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Bản ghi trùng</div>
+                <div class="stat-value" id="duplicateRecords">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Đã xóa</div>
+                <div class="stat-value" id="removedRecords">0</div>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <table id="resultTable">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên</th>
+                        <th>SĐT</th>
+                        <th>Nội dung</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <div class="copy-message" id="copyMessage">
+        <i class="fas fa-check-circle"></i>
+        <span>Đã sao chép tất cả dữ liệu vào clipboard!</span>
+    </div>
+
+    <script>
+        let processedData = [];
+        let uniquePhones = new Set();
+        let duplicateCount = 0;
+        let removedCount = 0;
+        
+        function processData() {
+            const input = document.getElementById('inputData').value.trim();
+            if (!input) {
+                alert('Vui lòng dán dữ liệu vào ô trước khi xử lý!');
+                return;
+            }
+            
+            const lines = input.split('\n');
+            processedData = [];
+            uniquePhones = new Set();
+            duplicateCount = 0;
+            removedCount = 0;
+            
+            // First pass to collect all phone numbers
+            const phoneGroups = {};
+            lines.forEach((line, index) => {
+                line = line.trim();
+                if (!line) return;
+                
+                const parts = splitLine(line);
+                if (parts.length >= 4) {
+                    const phone = extractPhoneNumber(parts[2]);
+                    if (phone) {
+                        if (!phoneGroups[phone]) {
+                            phoneGroups[phone] = [];
+                        }
+                        phoneGroups[phone].push({
+                            index: index,
+                            parts: parts,
+                            phone: phone,
+                            hasContent: hasContent(parts.slice(3).join(' '))
+                        });
+                    }
+                }
+            });
+            
+            // Second pass to process data with duplicate handling
+            const autoRemove = document.getElementById('autoRemoveDuplicates').checked;
+            const keepFirst = document.getElementById('keepFirstRecord').checked;
+            
+            let currentIndex = 0;
+            Object.keys(phoneGroups).forEach(phone => {
+                const group = phoneGroups[phone];
+                
+                if (group.length > 1) {
+                    duplicateCount += group.length - 1;
+                    
+                    // Sort group based on settings
+                    if (autoRemove) {
+                        if (keepFirst) {
+                            // Keep the first record (original order)
+                            group.sort((a, b) => a.index - b.index);
+                        } else {
+                            // Sort by hasContent (true first) then by original index
+                            group.sort((a, b) => {
+                                if (b.hasContent === a.hasContent) return a.index - b.index;
+                                return b.hasContent ? 1 : -1;
+                            });
+                        }
+                    }
+                    
+                    // Process each record in group
+                    group.forEach((record, i) => {
+                        const isDuplicate = i > 0;
+                        const isRemoved = autoRemove && isDuplicate;
+                        
+                        if (isRemoved) {
+                            removedCount++;
+                        }
+                        
+                        processedData.push({
+                            originalIndex: record.index + 1,
+                            stt: isRemoved ? -1 : ++currentIndex,
+                            ten: record.parts[1] || '',
+                            sdt: phone,
+                            noidung: cleanContent(record.parts.slice(3).join(' ')),
+                            isDuplicate: isDuplicate,
+                            isRemoved: isRemoved,
+                            hasContent: record.hasContent
+                        });
+                    });
+                } else {
+                    // Single record for this phone
+                    const record = group[0];
+                    processedData.push({
+                        originalIndex: record.index + 1,
+                        stt: ++currentIndex,
+                        ten: record.parts[1] || '',
+                        sdt: phone,
+                        noidung: cleanContent(record.parts.slice(3).join(' ')),
+                        isDuplicate: false,
+                        isRemoved: false,
+                        hasContent: record.hasContent
+                    });
+                }
+            });
+            
+            // Sort by original index to maintain input order
+            processedData.sort((a, b) => a.originalIndex - b.originalIndex);
+            
+            // Update unique phones count
+            uniquePhones = new Set(processedData.filter(item => !item.isRemoved).map(item => item.sdt));
+            
+            displayData();
+            updateStats();
+        }
+        
+        function removeDuplicates() {
+            if (processedData.length === 0) {
+                alert('Không có dữ liệu để xử lý! Vui lòng xử lý dữ liệu trước.');
+                return;
+            }
+            
+            const keepFirst = document.getElementById('keepFirstRecord').checked;
+            const phoneGroups = {};
+            let currentIndex = 0;
+            
+            // Reset removed status
+            processedData.forEach(item => {
+                item.isRemoved = false;
+                item.stt = ++currentIndex;
+            });
+            
+            // Group by phone number
+            processedData.forEach(item => {
+                if (!item.isRemoved) {
+                    if (!phoneGroups[item.sdt]) {
+                        phoneGroups[item.sdt] = [];
+                    }
+                    phoneGroups[item.sdt].push(item);
+                }
+            });
+            
+            // Process duplicates
+            removedCount = 0;
+            Object.keys(phoneGroups).forEach(phone => {
+                const group = phoneGroups[phone];
+                
+                if (group.length > 1) {
+                    // Sort group based on settings
+                    if (keepFirst) {
+                        // Keep the first record (original order)
+                        group.sort((a, b) => a.originalIndex - b.originalIndex);
+                    } else {
+                        // Sort by hasContent (true first) then by original index
+                        group.sort((a, b) => {
+                            if (b.hasContent === a.hasContent) return a.originalIndex - b.originalIndex;
+                            return b.hasContent ? 1 : -1;
+                        });
+                    }
+                    
+                    // Mark duplicates as removed
+                    group.forEach((item, i) => {
+                        if (i > 0) {
+                            item.isRemoved = true;
+                            item.stt = -1;
+                            removedCount++;
+                        }
+                    });
+                }
+            });
+            
+            // Renumber remaining items
+            currentIndex = 0;
+            processedData.forEach(item => {
+                if (!item.isRemoved) {
+                    item.stt = ++currentIndex;
+                }
+            });
+            
+            // Update unique phones count
+            uniquePhones = new Set(processedData.filter(item => !item.isRemoved).map(item => item.sdt));
+            
+            displayData();
+            updateStats();
+        }
+        
+        function hasContent(text) {
+            const cleaned = cleanContent(text);
+            return cleaned.length > 0 && cleaned !== '---';
+        }
+        
+        function splitLine(line) {
+            // Try splitting by tabs first
+            let parts = line.split('\t');
+            if (parts.length < 4) {
+                // If not enough parts, split by 2+ spaces
+                parts = line.split(/\s{2,}/);
+            }
+            return parts.map(part => part.trim()).filter(part => part);
+        }
+        
+        function extractPhoneNumber(phoneStr) {
+            if (!phoneStr) return '';
+            
+            // Extract phone number
+            let phone = phoneStr.replace(/\D/g, ''); // Remove non-digit characters
+            
+            // Normalize phone number format
+            if (phone.startsWith('84')) {
+                phone = '0' + phone.substring(2);
+            } else if (phone.startsWith('+84')) {
+                phone = '0' + phone.substring(3);
+            }
+            
+            // Validate phone number length (10 digits for Vietnam)
+            return phone.length === 10 ? phone : '';
+        }
+        
+        function cleanContent(content) {
+            if (!content) return '';
+            // Remove phone numbers from content
+            let cleaned = content.replace(/(\+?84|0)(\d{9,10})\b/g, '').trim();
+            // Remove common placeholder
+            cleaned = cleaned.replace(/^[-]+$/, '').trim();
+            return cleaned;
+        }
+        
+        function displayData() {
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = '';
+
+    // Hàm lấy giá trị biến CSS từ :root
+    const getCSSVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+    processedData.forEach(item => {
+        const row = document.createElement('tr');
+
+        // Thêm class cho dòng nếu bị xóa hoặc trùng
+        if (item.isRemoved) {
+            row.classList.add('removed-duplicate');
+        } else if (item.isDuplicate) {
+            row.classList.add('duplicate-sdt');
+        }
+
+        // Cột STT
+        const sttCell = document.createElement('td');
+        sttCell.textContent = item.isRemoved ? 'X' : item.stt;
+        row.appendChild(sttCell);
+
+        // Cột Tên
+        const tenCell = document.createElement('td');
+        tenCell.textContent = item.ten;
+        row.appendChild(tenCell);
+
+        // Cột SĐT
+        const sdtCell = document.createElement('td');
+        sdtCell.textContent = item.sdt;
+        row.appendChild(sdtCell);
+
+        // Cột Nội dung
+        const noidungCell = document.createElement('td');
+        noidungCell.textContent = item.noidung;
+        row.appendChild(noidungCell);
+
+        // Cột Trạng thái
+        const statusCell = document.createElement('td');
+        if (item.isRemoved) {
+            statusCell.textContent = 'Đã xóa';
+            statusCell.style.color = getCSSVar('--danger-color');
+        } else if (item.isDuplicate) {
+            statusCell.textContent = 'Trùng SĐT';
+            statusCell.style.color = getCSSVar('--warning-color');
+        } else {
+            statusCell.textContent = 'OK';
+            statusCell.style.color = getCSSVar('--success-color');
+        }
+        row.appendChild(statusCell);
+
+        // Thêm dòng vào bảng
+        tableBody.appendChild(row);
+    });
+}
+
+        
+        function updateStats() {
+            document.getElementById('statsContainer').style.display = 'flex';
+            document.getElementById('totalRecords').textContent = processedData.length;
+            document.getElementById('uniquePhones').textContent = uniquePhones.size;
+            document.getElementById('duplicateRecords').textContent = duplicateCount;
+            document.getElementById('removedRecords').textContent = removedCount;
+        }
+        
+        function exportToExcel() {
+            if (processedData.length === 0) {
+                alert('Không có dữ liệu để xuất! Vui lòng xử lý dữ liệu trước.');
+                return;
+            }
+            
+            // Prepare worksheet - only include non-removed records
+            const filteredData = processedData.filter(item => !item.isRemoved);
+            const wsData = [
+                ['STT', 'Tên', 'SĐT', 'Nội dung', 'Ghi chú'], // Header row
+                ...filteredData.map(item => [
+                    item.stt,
+                    item.ten,
+                    item.sdt,
+                    item.noidung,
+                    item.isDuplicate ? 'Trùng SĐT' : ''
+                ])
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            
+            // Set column widths
+            ws['!cols'] = [
+                { width: 10 }, // STT
+                { width: 20 }, // Tên
+                { width: 15 }, // SĐT
+                { width: 50 }, // Nội dung
+                { width: 15 }  // Ghi chú
+            ];
+            
+            // Create workbook
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Dữ liệu đã xử lý");
+            
+            // Generate file and download
+            const date = new Date();
+            const timestamp = `${date.getDate()}-${date.getMonth()+1}-${date.getFullYear()}_${date.getHours()}${date.getMinutes()}`;
+            XLSX.writeFile(wb, `Du_lieu_da_xu_ly_${timestamp}.xlsx`);
+        }
+        
+        function copyAllData() {
+            if (processedData.length === 0) {
+                alert('Không có dữ liệu để sao chép! Vui lòng xử lý dữ liệu trước.');
+                return;
+            }
+            
+            // Prepare data for copying - include all data with status
+            let dataToCopy = "STT\tTên\tSĐT\tNội dung\tTrạng thái\n";
+            
+            processedData.forEach(item => {
+                dataToCopy += `${item.isRemoved ? 'X' : item.stt}\t${item.ten}\t${item.sdt}\t${item.noidung}\t`;
+                
+                if (item.isRemoved) {
+                    dataToCopy += "Đã xóa";
+                } else if (item.isDuplicate) {
+                    dataToCopy += "Trùng SĐT";
+                } else {
+                    dataToCopy += "OK";
+                }
+                
+                dataToCopy += "\n";
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(dataToCopy).then(() => {
+                showCopyMessage();
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Không thể sao chép dữ liệu. Vui lòng thử lại!');
+            });
+        }
+        
+        function showCopyMessage() {
+            const message = document.getElementById('copyMessage');
+            message.style.display = 'flex';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 3000);
+        }
+        
+        function clearData() {
+            document.getElementById('inputData').value = '';
+            document.getElementById('tableBody').innerHTML = '';
+            document.getElementById('statsContainer').style.display = 'none';
+            processedData = [];
+            uniquePhones = new Set();
+            duplicateCount = 0;
+            removedCount = 0;
+        }
+    </script>
+</body>
+</html>
